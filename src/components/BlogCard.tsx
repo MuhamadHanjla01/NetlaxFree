@@ -1,6 +1,6 @@
 import React from 'react';
 import type { BlogPost } from '../types/blog';
-import { Mail, Crown, Zap, Globe, ArrowUpRight, Shield, Edit3, Trash2, Flame } from 'lucide-react';
+import { Mail, Crown, Zap, Globe, ArrowUpRight, Shield, Edit3, Trash2, Flame, Clock } from 'lucide-react';
 
 interface Props {
   post: BlogPost;
@@ -34,6 +34,20 @@ export const BlogCard: React.FC<Props> = ({
   const accountEmail = post.accountEmail || 'jayasekar04@gmail.com';
   const countryCode = post.countryCode || 'IN';
   const planTier = post.planTier || 'BASIC';
+
+  let expiryText = null;
+  if (post.expiryDays && post.createdAt) {
+    const createdDate = new Date(post.createdAt).getTime();
+    const expiryDate = createdDate + (post.expiryDays * 24 * 60 * 60 * 1000);
+    const now = Date.now();
+    const daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+    
+    if (daysLeft > 0) {
+      expiryText = `${daysLeft} DAY${daysLeft !== 1 ? 'S' : ''} LEFT`;
+    } else {
+      expiryText = 'EXPIRED';
+    }
+  }
 
   return (
     <div
@@ -189,6 +203,30 @@ export const BlogCard: React.FC<Props> = ({
               {planTier}
             </span>
           </div>
+
+          {/* EXPIRY DAYS */}
+          {expiryText && (
+            <div
+              style={{
+                padding: '8px 12px',
+                borderRadius: 8,
+                background: '#1a0b0b',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 8,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, fontWeight: 800, color: '#ef4444' }}>
+                <Clock style={{ width: 13, height: 13, color: '#ef4444' }} />
+                <span>AUTO-DELETES IN</span>
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 900, color: '#ef4444', fontFamily: 'monospace', letterSpacing: '0.05em' }}>
+                {expiryText}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Read / Open Action Button */}
