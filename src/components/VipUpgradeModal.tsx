@@ -151,20 +151,27 @@ export const VipUpgradeModal: React.FC<Props> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 10,
-              padding: '14px 20px',
+              gap: 8,
+              padding: '14px 16px',
               borderRadius: 12,
               background: 'linear-gradient(135deg, #0088cc 0%, #006699 100%)',
               color: '#ffffff',
               fontWeight: 900,
-              fontSize: 15,
+              fontSize: 'clamp(13px, 3.6vw, 15px)',
               textDecoration: 'none',
               boxShadow: '0 8px 24px rgba(0, 136, 204, 0.4)',
               transition: 'all 0.2s ease',
+              textAlign: 'center',
+              boxSizing: 'border-box',
+              whiteSpace: 'normal',
+              wordBreak: 'break-word',
+              lineHeight: 1.35,
             }}
           >
-            <Send style={{ width: 18, height: 18 }} />
-            <span>Message Now on Telegram (@{cleanHandle})</span>
+            <Send style={{ width: 18, height: 18, flexShrink: 0 }} />
+            <span style={{ display: 'inline-block', maxWidth: '100%', overflowWrap: 'anywhere' }}>
+              Message Now on Telegram (@{cleanHandle})
+            </span>
           </a>
 
           <div style={{ textAlign: 'center', marginTop: 14 }}>
