@@ -13,8 +13,12 @@ export const VipUpgradeModal: React.FC<Props> = ({
 }) => {
   if (!isOpen) return null;
 
+  const effectiveUsername = (!telegramUsername || telegramUsername === 'admin_vip_support' || telegramUsername.includes('admin_vip_support'))
+    ? 'unkown010101010101010'
+    : telegramUsername;
+
   // Format telegram link cleanly
-  const cleanHandle = telegramUsername.replace('@', '').replace('https://t.me/', '');
+  const cleanHandle = effectiveUsername.replace('@', '').replace('https://t.me/', '');
   const telegramUrl = `https://t.me/${cleanHandle}`;
 
   return (

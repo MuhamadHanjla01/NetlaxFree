@@ -58,7 +58,11 @@ export function App() {
   const [authPin, setAuthPin] = useState(() => localStorage.getItem(LOCAL_STORAGE_KEY_PIN) || 'admin123');
 
   const [telegramUsername, setTelegramUsername] = useState<string>(() => {
-    return localStorage.getItem(LOCAL_STORAGE_KEY_TELEGRAM) || 'unkown010101010101010';
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY_TELEGRAM);
+    if (!saved || saved === 'admin_vip_support' || saved.includes('admin_vip_support')) {
+      return 'unkown010101010101010';
+    }
+    return saved;
   });
 
   useEffect(() => {
