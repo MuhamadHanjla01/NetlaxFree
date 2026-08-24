@@ -75,6 +75,7 @@ export interface BlogPost {
   netscapeConfig?: string;
   cardFormat?: 'links' | 'cookie';
   accountType?: 'Prime' | 'Free';
+  expiryDays?: number; // Auto-delete card after N days from creation
 }
 
 export interface AdminStats {

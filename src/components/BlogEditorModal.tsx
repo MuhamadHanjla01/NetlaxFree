@@ -41,6 +41,7 @@ export const BlogEditorModal: React.FC<Props> = ({
   const [paymentMethod, setPaymentMethod] = useState('UPI');
   const [nextBillingCycle, setNextBillingCycle] = useState('2026-09-10');
   const [memberSince, setMemberSince] = useState('August 2024');
+  const [expiryDays, setExpiryDays] = useState<number | ''>('');
 
   // Direct Links
   const [pcLink, setPcLink] = useState('https://netflix.com/?nftoken=BgiQvuvcAxLCAQMOixN0dTiddNkrFtM4H/Du0JcTdpa7Z1z4X');
@@ -67,6 +68,7 @@ export const BlogEditorModal: React.FC<Props> = ({
       setPcLink(editingPost.pcLink || 'https://netflix.com/?nftoken=BgiQvuvcAxLCAQMOixN0dTiddNkrFtM4H/Du0JcTdpa7Z1z4X');
       setMobileLink(editingPost.mobileLink || 'https://netflix.com/unsupported?nftoken=BgiQvuvcAxLCAQMOixN0dTiddNkrFtM4H/Du0J');
       setTvLink(editingPost.tvLink || 'https://netflix.com/tv2?nftoken=BgiQvuvcAxLCAQMOixN0dTiddNkrFtM4H/Du0JcTdpa7Z1');
+      setExpiryDays(editingPost.expiryDays || '');
       setNetscapeConfig(
         editingPost.netscapeConfig ||
         '# Netscape HTTP Cookie File\n# http://curl.haxx.se/rfc/cookie_spec.html\n.primevideo.com\tTRUE\t/\tFALSE\t1787494000\tat-main\tAtza|IwEB...'
@@ -87,6 +89,7 @@ export const BlogEditorModal: React.FC<Props> = ({
       setPcLink(`https://${targetSrv.toLowerCase().replace(/[^a-z0-0]/g, '')}.com/?nftoken=BgiQvuvcAxLCAQMOixN0dTiddNkrFtM4H`);
       setMobileLink(`https://mobile.${targetSrv.toLowerCase().replace(/[^a-z0-0]/g, '')}.com/auth`);
       setTvLink(`https://tv.${targetSrv.toLowerCase().replace(/[^a-z0-0]/g, '')}.com/code`);
+      setExpiryDays('');
       setNetscapeConfig(
         targetSrv === 'Prime Video'
           ? '# Netscape HTTP Cookie File\n# http://curl.haxx.se/rfc/cookie_spec.html\n.primevideo.com\tTRUE\t/\tFALSE\t1787494000\tat-main\tAtza|IwEB...'
@@ -135,6 +138,7 @@ export const BlogEditorModal: React.FC<Props> = ({
       netscapeConfig,
       cardFormat,
       accountType,
+      ...(expiryDays ? { expiryDays: Number(expiryDays) } : {}),
     };
 
     onSave(savedPost);
@@ -392,6 +396,19 @@ export const BlogEditorModal: React.FC<Props> = ({
                     placeholder="2026-09-10"
                     className="form-input"
                     style={{ borderColor: 'rgba(234, 179, 8, 0.3)', color: '#eab308', fontWeight: 700, fontFamily: 'monospace' }}
+                  />
+                </div>
+
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label style={{ fontSize: 10, color: '#ef4444', fontWeight: 800 }}>AUTO DELETE AFTER (DAYS)</label>
+                  <input
+                    type="number"
+                    value={expiryDays}
+                    onChange={(e) => setExpiryDays(e.target.value === '' ? '' : Number(e.target.value))}
+                    placeholder="e.g. 7"
+                    className="form-input"
+                    min="1"
+                    style={{ borderColor: 'rgba(239, 68, 68, 0.3)', color: '#ef4444', fontWeight: 700, fontFamily: 'monospace' }}
                   />
                 </div>
               </div>

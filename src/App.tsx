@@ -278,6 +278,30 @@ export function App() {
     }
   }, [registeredUsers]);
 
+  // Check and auto-delete expired cards based on expiryDays
+  useEffect(() => {
+    let postsUpdated = false;
+    const now = Date.now();
+    
+    const checkedPosts = posts.filter(post => {
+      if (post.expiryDays && post.createdAt) {
+        const createdDate = new Date(post.createdAt).getTime();
+        const expiryDate = createdDate + (post.expiryDays * 24 * 60 * 60 * 1000);
+        
+        if (now > expiryDate) {
+          postsUpdated = true;
+          return false; // Remove this post
+        }
+      }
+      return true; // Keep this post
+    });
+    
+    if (postsUpdated) {
+      lastPushTimeRef.current = Date.now();
+      setPosts(checkedPosts);
+    }
+  }, [posts]);
+
   // Real-time BroadcastChannel & Storage Sync for 0ms cross-tab/window updates
   useEffect(() => {
     let channel: BroadcastChannel | null = null;
