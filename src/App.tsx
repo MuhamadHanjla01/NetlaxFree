@@ -376,36 +376,41 @@ export function App() {
   // Push updates to LocalStorage, BroadcastChannel, AND Server API on change
   useEffect(() => {
     if (!isInitialLoadCompletedRef.current) return;
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY_PIN, adminPin);
-      localStorage.setItem(LOCAL_STORAGE_KEY_BLOGS, JSON.stringify(posts));
-      localStorage.setItem(LOCAL_STORAGE_KEY_PAGES, JSON.stringify(sidebarPages));
-      localStorage.setItem(LOCAL_STORAGE_KEY_TELEGRAM, telegramUsername);
 
-      // Broadcast to other tabs in same browser
-      const channel = new BroadcastChannel('antigravity_realtime_sync');
-      channel.postMessage({ type: 'POSTS_UPDATE', data: posts });
-      channel.postMessage({ type: 'PAGES_UPDATE', data: sidebarPages });
-      channel.postMessage({ type: 'TELEGRAM_UPDATE', data: telegramUsername });
-      channel.close();
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY_PIN, adminPin);
+        localStorage.setItem(LOCAL_STORAGE_KEY_BLOGS, JSON.stringify(posts));
+        localStorage.setItem(LOCAL_STORAGE_KEY_PAGES, JSON.stringify(sidebarPages));
+        localStorage.setItem(LOCAL_STORAGE_KEY_TELEGRAM, telegramUsername);
 
-      // Push to backend server file for DIFFERENT browsers
-      console.log('Pushing to server! Deps changed.', Date.now());
-      lastPushTimeRef.current = Date.now();
+        // Broadcast to other tabs in same browser
+        const channel = new BroadcastChannel('antigravity_realtime_sync');
+        channel.postMessage({ type: 'POSTS_UPDATE', data: posts });
+        channel.postMessage({ type: 'PAGES_UPDATE', data: sidebarPages });
+        channel.postMessage({ type: 'TELEGRAM_UPDATE', data: telegramUsername });
+        channel.close();
 
-      fetch('/api/sync', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-pin': authPin
-        },
-        body: JSON.stringify({ posts, sidebarPages, adminPin, registeredUsers, telegramUsername }),
-      }).then(res => {
-        if (res.ok && authPin !== adminPin) {
-          setAuthPin(adminPin);
-        }
-      }).catch(() => { });
-    } catch (err) { }
+        // Push to backend server file for DIFFERENT browsers
+        console.log('Pushing to server! Deps changed.', Date.now());
+        lastPushTimeRef.current = Date.now();
+
+        fetch('/api/sync', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-pin': authPin
+          },
+          body: JSON.stringify({ posts, sidebarPages, adminPin, registeredUsers, telegramUsername }),
+        }).then(res => {
+          if (res.ok && authPin !== adminPin) {
+            setAuthPin(adminPin);
+          }
+        }).catch(() => { });
+      } catch (err) { }
+    }, 10);
+
+    return () => clearTimeout(timer);
   }, [posts, sidebarPages, adminPin, registeredUsers, telegramUsername, authPin]);
 
   const handleLoadingFinish = useCallback(() => {
