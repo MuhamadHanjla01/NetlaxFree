@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 65" fill="none">
+  <defs>
+    <linearGradient id="netlaxRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E50914" />
+      <stop offset="100%" stop-color="#B20710" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Icon Badge -->
+  <rect x="0" y="4" width="56" height="56" rx="14" fill="url(#netlaxRed)" />
+  <path d="M18 18V46M18 18L38 46M38 18V46" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Text: NETLAX -->
+  <text x="72" y="47" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="38" fill="url(#netlaxRed)" letter-spacing="-1px">NETLAX</text>
+
+  <!-- Text: FREE -->
+  <text x="254" y="47" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="38" fill="#FFFFFF" letter-spacing="-1px">FREE</text>
+
+  <!-- Accent dot -->
+  <circle cx="368" cy="20" r="5" fill="#E50914" />
+</svg>
