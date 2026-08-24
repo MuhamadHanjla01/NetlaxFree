@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { BlogPost, SidebarPage, UserAccount } from '../types/blog';
 import { TrafficChart } from './TrafficChart';
 import { ServiceHub } from './ServiceHub';
@@ -44,6 +44,10 @@ export const AdminDashboard: React.FC<Props> = ({
   // Telegram settings state
   const [telegramInput, setTelegramInput] = useState(telegramUsername);
   const [telegramSuccessMsg, setTelegramSuccessMsg] = useState(false);
+
+  useEffect(() => {
+    setTelegramInput(telegramUsername);
+  }, [telegramUsername]);
 
   // Compute metrics
   const totalViews = posts.reduce((acc, p) => acc + p.viewsCount, 0);

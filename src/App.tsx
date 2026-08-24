@@ -257,6 +257,7 @@ export function App() {
 
   // Cross-Browser Real-Time Data Sync via Server API (/api/sync)
   const lastPushTimeRef = useRef<number>(0);
+  const isInitialLoadCompletedRef = useRef<boolean>(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -296,7 +297,9 @@ export function App() {
             }
           }
         }
-      } catch (err) {}
+      } catch (err) {} finally {
+        if (isMounted) isInitialLoadCompletedRef.current = true;
+      }
     };
 
     fetchServerData();
@@ -333,6 +336,7 @@ export function App() {
 
   // Push updates to LocalStorage, BroadcastChannel, AND Server API on change
   useEffect(() => {
+    if (!isInitialLoadCompletedRef.current) return;
     try {
       localStorage.setItem(LOCAL_STORAGE_KEY_PIN, adminPin);
       localStorage.setItem(LOCAL_STORAGE_KEY_BLOGS, JSON.stringify(posts));
