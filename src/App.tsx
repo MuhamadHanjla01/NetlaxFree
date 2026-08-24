@@ -147,6 +147,31 @@ export function App() {
     }
   }, [currentUser]);
 
+  // Body scroll lock for Modals (improves performance & UI/UX perfection)
+  useEffect(() => {
+    const isAnyModalOpen =
+      isPlatformModalOpen ||
+      isAdminLoginOpen ||
+      isAuthModalOpen ||
+      isVipModalOpen ||
+      isEditorOpen ||
+      selectedPostForDetail !== null;
+
+    if (isAnyModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [
+    isPlatformModalOpen,
+    isAdminLoginOpen,
+    isAuthModalOpen,
+    isVipModalOpen,
+    isEditorOpen,
+    selectedPostForDetail,
+  ]);
+
   // Computed active user synced 100% live with registeredUsers database
   const activeUser = useMemo(() => {
     if (!currentUser) return null;
@@ -308,7 +333,7 @@ export function App() {
     };
 
     fetchServerData();
-    const interval = setInterval(fetchServerData, 1500);
+    const interval = setInterval(fetchServerData, 5000);
 
     return () => {
       isMounted = false;
