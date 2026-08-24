@@ -218,6 +218,9 @@ export function App() {
         if (event.data?.type === 'USERS_UPDATE' && Array.isArray(event.data.data)) {
           setRegisteredUsers(event.data.data);
         }
+        if (event.data?.type === 'TELEGRAM_UPDATE' && typeof event.data.data === 'string') {
+          setTelegramUsername(event.data.data);
+        }
       };
     } catch (e) {}
 
@@ -239,6 +242,9 @@ export function App() {
           const parsed = JSON.parse(e.newValue);
           if (Array.isArray(parsed)) setRegisteredUsers(parsed);
         } catch (err) {}
+      }
+      if (e.key === LOCAL_STORAGE_KEY_TELEGRAM && e.newValue) {
+        setTelegramUsername(e.newValue);
       }
     };
 
@@ -285,6 +291,9 @@ export function App() {
             if (json.adminPin && typeof json.adminPin === 'string') {
               setAdminPin((prev) => (prev === json.adminPin ? prev : json.adminPin));
             }
+            if (json.telegramUsername && typeof json.telegramUsername === 'string') {
+              setTelegramUsername((prev) => (prev === json.telegramUsername ? prev : json.telegramUsername));
+            }
           }
         }
       } catch (err) {}
@@ -328,11 +337,13 @@ export function App() {
       localStorage.setItem(LOCAL_STORAGE_KEY_PIN, adminPin);
       localStorage.setItem(LOCAL_STORAGE_KEY_BLOGS, JSON.stringify(posts));
       localStorage.setItem(LOCAL_STORAGE_KEY_PAGES, JSON.stringify(sidebarPages));
+      localStorage.setItem(LOCAL_STORAGE_KEY_TELEGRAM, telegramUsername);
 
       // Broadcast to other tabs in same browser
       const channel = new BroadcastChannel('antigravity_realtime_sync');
       channel.postMessage({ type: 'POSTS_UPDATE', data: posts });
       channel.postMessage({ type: 'PAGES_UPDATE', data: sidebarPages });
+      channel.postMessage({ type: 'TELEGRAM_UPDATE', data: telegramUsername });
       channel.close();
 
       // Push to backend server file for DIFFERENT browsers
@@ -345,14 +356,14 @@ export function App() {
           'Content-Type': 'application/json',
           'x-admin-pin': authPin
         },
-        body: JSON.stringify({ posts, sidebarPages, adminPin, registeredUsers }),
+        body: JSON.stringify({ posts, sidebarPages, adminPin, registeredUsers, telegramUsername }),
       }).then(res => {
         if (res.ok && authPin !== adminPin) {
            setAuthPin(adminPin);
         }
       }).catch(() => {});
     } catch (err) {}
-  }, [posts, sidebarPages, adminPin, registeredUsers, authPin]);
+  }, [posts, sidebarPages, adminPin, registeredUsers, telegramUsername, authPin]);
 
   const handleLoadingFinish = useCallback(() => {
     setIsLoading(false);
@@ -397,6 +408,12 @@ export function App() {
     setAdminPin(newPin);
     setAuthPin(newPin);
     localStorage.setItem(LOCAL_STORAGE_KEY_PIN, newPin);
+  };
+
+  const handleChangeTelegramUsername = (newUsername: string) => {
+    lastPushTimeRef.current = Date.now();
+    setTelegramUsername(newUsername);
+    localStorage.setItem(LOCAL_STORAGE_KEY_TELEGRAM, newUsername);
   };
 
   // Is on main home view (no service or search filter active)
@@ -653,7 +670,7 @@ export function App() {
               onUpdateUser={handleUpdateUser}
               onDeleteUser={handleDeleteUser}
               telegramUsername={telegramUsername}
-              onChangeTelegramUsername={setTelegramUsername}
+              onChangeTelegramUsername={handleChangeTelegramUsername}
             />
           ) : !isAdmin && isAdminRouteAttempt ? (
             <AccessDeniedScreen
