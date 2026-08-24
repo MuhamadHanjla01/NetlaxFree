@@ -23,6 +23,7 @@ const LOCAL_STORAGE_KEY_PIN = 'netflix_admin_pin_v1';
 const LOCAL_STORAGE_KEY_USER = 'netflix_current_user_v1';
 const LOCAL_STORAGE_KEY_REGISTERED_USERS = 'netflix_registered_users_v1';
 const LOCAL_STORAGE_KEY_TELEGRAM = 'netflix_telegram_username_v1';
+const LOCAL_STORAGE_KEY_ADMIN_DEVICE = 'netlax_authorized_admin_device_v1';
 
 const DEFAULT_REGISTERED_USERS: UserAccount[] = [];
 
@@ -320,11 +321,20 @@ export function App() {
     const checkAdminRoute = () => {
       const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
+      const search = window.location.search.toLowerCase();
       const isRouteMatch = path === '/admin' || path.endsWith('/admin') || hash === '#admin' || hash === '#/admin';
+      
+      const isSecretKeyPresent = search.includes('key=master') || search.includes('auth=admin') || search.includes('key=admin');
+      const isDeviceAuthorized = localStorage.getItem(LOCAL_STORAGE_KEY_ADMIN_DEVICE) === 'true' || isSecretKeyPresent;
+
       if (isRouteMatch) {
         setIsAdminRouteAttempt(true);
         if (!isAdmin) {
-          setIsAdminLoginOpen(true);
+          if (isDeviceAuthorized) {
+            setIsAdminLoginOpen(true);
+          } else {
+            setIsAdminLoginOpen(false);
+          }
         }
       }
     };
@@ -387,13 +397,18 @@ export function App() {
         window.history.pushState({}, '', '/');
       }
     } else {
-      // Require password PIN verification
+      const isDeviceAuthorized = localStorage.getItem(LOCAL_STORAGE_KEY_ADMIN_DEVICE) === 'true';
       setIsAdminRouteAttempt(true);
-      setIsAdminLoginOpen(true);
+      if (isDeviceAuthorized) {
+        setIsAdminLoginOpen(true);
+      } else {
+        setIsAdminLoginOpen(false);
+      }
     }
   };
 
   const handleAdminLoginSuccess = (enteredPin?: string) => {
+    localStorage.setItem(LOCAL_STORAGE_KEY_ADMIN_DEVICE, 'true');
     setIsAdmin(true);
     setIsAdminRouteAttempt(true);
     setIsAdminLoginOpen(false);
@@ -694,7 +709,14 @@ export function App() {
           ) : !isAdmin && isAdminRouteAttempt ? (
             <AccessDeniedScreen
               onRetreatToHome={handleRetreatToHome}
-              onReconnect={() => setIsAdminLoginOpen(true)}
+              onReconnect={() => {
+                const isDeviceAuthorized = localStorage.getItem(LOCAL_STORAGE_KEY_ADMIN_DEVICE) === 'true';
+                if (isDeviceAuthorized) {
+                  setIsAdminLoginOpen(true);
+                } else {
+                  handleRetreatToHome();
+                }
+              }}
             />
           ) : (
             <div>
