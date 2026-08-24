@@ -362,7 +362,7 @@ export const BlogEditorModal: React.FC<Props> = ({
                 </div>
               </div>
 
-              <div className="form-grid-3">
+              <div className="form-grid-2">
                 <div className="form-group" style={{ margin: 0 }}>
                   <label style={{ fontSize: 10, color: '#06b6d4', fontWeight: 800 }}>COUNTRY CODE</label>
                   <input
