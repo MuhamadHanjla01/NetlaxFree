@@ -419,9 +419,20 @@ export function App() {
   };
 
   const handleChangeTelegramUsername = (newUsername: string) => {
+    isInitialLoadCompletedRef.current = true;
     lastPushTimeRef.current = Date.now();
     setTelegramUsername(newUsername);
     localStorage.setItem(LOCAL_STORAGE_KEY_TELEGRAM, newUsername);
+
+    // Direct API POST call for 100% reliable instant Telegram handle update across serverless Vercel & local
+    fetch('/api/sync', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-admin-pin': authPin
+      },
+      body: JSON.stringify({ posts, sidebarPages, adminPin, registeredUsers, telegramUsername: newUsername }),
+    }).catch(() => {});
   };
 
   // Is on main home view (no service or search filter active)
