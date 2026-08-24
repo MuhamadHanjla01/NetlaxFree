@@ -9,7 +9,7 @@ interface Props {
 export const VipUpgradeModal: React.FC<Props> = ({
   isOpen,
   onClose,
-  telegramUsername = 'admin_vip_support',
+  telegramUsername = 'unkown010101010101010',
 }) => {
   if (!isOpen) return null;
 
