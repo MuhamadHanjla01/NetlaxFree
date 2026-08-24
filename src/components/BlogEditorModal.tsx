@@ -95,16 +95,7 @@ export const BlogEditorModal: React.FC<Props> = ({
     }
   }, [editingPost, isOpen, defaultService]);
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+  // Body scroll lock is managed globally by App.tsx — no duplicate needed here
 
   if (!isOpen) return null;
 

@@ -15,7 +15,7 @@ import { UserAuthModal } from './components/UserAuthModal';
 import { VipUpgradeModal } from './components/VipUpgradeModal';
 import { AccessDeniedScreen } from './components/AccessDeniedScreen';
 import { LoadingScreen } from './components/LoadingScreen';
-import { Tv, ArrowLeft, Shield, CheckCircle2, Plus, Crown, Zap, User } from 'lucide-react';
+import { Tv, ArrowLeft, Shield, CheckCircle2, Plus, Crown, Zap, User, AlertTriangle, XCircle, Info } from 'lucide-react';
 
 const LOCAL_STORAGE_KEY_BLOGS = 'netflix_blogs_app_data_v2';
 const LOCAL_STORAGE_KEY_PAGES = 'netflix_sidebar_pages_v1';
@@ -136,7 +136,52 @@ export function App() {
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [accountTypeFilter, setAccountTypeFilter] = useState<'All' | 'Prime' | 'Free'>('All');
 
-  // Removed persist Admin mode status to local storage for security
+  // Toast Notification System (replaces all blocking alert() calls)
+  const [toasts, setToasts] = useState<{ id: number; message: string; type: 'error' | 'warning' | 'info' }[]>([]);
+  const toastIdRef = useRef(0);
+
+  const showToast = useCallback((message: string, type: 'error' | 'warning' | 'info' = 'warning') => {
+    const id = ++toastIdRef.current;
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4500);
+  }, []);
+
+  // Admin Session Timeout (30 minutes of inactivity)
+  const adminActivityRef = useRef<number>(Date.now());
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    adminActivityRef.current = Date.now();
+
+    const TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+    const resetTimer = () => { adminActivityRef.current = Date.now(); };
+
+    const checkTimeout = setInterval(() => {
+      if (Date.now() - adminActivityRef.current > TIMEOUT_MS) {
+        setIsAdmin(false);
+        setIsAdminRouteAttempt(false);
+        if (window.location.pathname.endsWith('/admin') || window.location.hash.includes('admin')) {
+          window.history.pushState({}, '', '/');
+        }
+        showToast('Admin session expired due to 30 minutes of inactivity.', 'info');
+      }
+    }, 60000); // Check every 60s
+
+    window.addEventListener('mousemove', resetTimer);
+    window.addEventListener('keydown', resetTimer);
+    window.addEventListener('click', resetTimer);
+    window.addEventListener('scroll', resetTimer);
+
+    return () => {
+      clearInterval(checkTimeout);
+      window.removeEventListener('mousemove', resetTimer);
+      window.removeEventListener('keydown', resetTimer);
+      window.removeEventListener('click', resetTimer);
+      window.removeEventListener('scroll', resetTimer);
+    };
+  }, [isAdmin, showToast]);
 
   // Persist Current User and Registered Users list
   useEffect(() => {
@@ -574,7 +619,7 @@ export function App() {
     ) {
       if (updatedUser.isBanned) {
         setCurrentUser(null);
-        alert('🚫 Your account has been banned by the Administrator.');
+        showToast('🚫 Your account has been banned by the Administrator.', 'error');
       } else {
         setCurrentUser(updatedUser);
       }
@@ -632,7 +677,7 @@ export function App() {
     } else {
       // Reached limit
       setIsVipModalOpen(true);
-      alert('Free tier allows a maximum of 3 services. Please upgrade to VIP to unlock more.');
+      showToast('Free tier allows a maximum of 3 services. Please upgrade to VIP to unlock more.', 'warning');
     }
   };
 
@@ -655,7 +700,7 @@ export function App() {
     // Check if the card itself requires VIP
     if (post.accountType === 'Prime') {
       setIsVipModalOpen(true);
-      alert('You are not VIP. Please join VIP to access this card.');
+      showToast('You are not VIP. Please join VIP to access this card.', 'warning');
       return;
     }
 
@@ -671,7 +716,7 @@ export function App() {
     } else {
       // Reached limit
       setIsVipModalOpen(true);
-      alert('Free tier allows a maximum of 3 services. Please upgrade to VIP to unlock more.');
+      showToast('Free tier allows a maximum of 3 services. Please upgrade to VIP to unlock more.', 'warning');
     }
   };
 
@@ -1094,9 +1139,11 @@ export function App() {
                             setIsEditorOpen(true);
                           }}
                           onDelete={(id) => {
+                            lastPushTimeRef.current = Date.now();
                             setPosts((prev) => prev.filter((item) => item.id !== id));
                           }}
                           onTogglePin={(id) => {
+                            lastPushTimeRef.current = Date.now();
                             setPosts((prev) =>
                               prev.map((item) => (item.id === id ? { ...item, isFeatured: !item.isFeatured } : item))
                             );
@@ -1130,6 +1177,39 @@ export function App() {
           )}
 
         </main>
+
+        {/* Professional SaaS Footer */}
+        {!isLoading && (
+          <footer style={{
+            padding: '32px 24px 24px',
+            borderTop: '1px solid var(--border-subtle)',
+            background: 'linear-gradient(180deg, transparent 0%, rgba(4, 13, 18, 0.95) 100%)',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 12,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <Tv style={{ width: 18, height: 18, color: '#E50914' }} />
+              <span style={{ fontSize: 15, fontWeight: 900, letterSpacing: '-0.01em', color: '#ffffff' }}>
+                Netlax<span style={{ color: '#E50914' }}>Free</span>
+              </span>
+            </div>
+            <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5, maxWidth: 480 }}>
+              Free & premium streaming accounts hub. Access Netscape cookies, direct login links, and step-by-step setup guides across all major platforms.
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>© {new Date().getFullYear()} NetlaxFree</span>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.15)' }}>•</span>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>All Rights Reserved</span>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.15)' }}>•</span>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <Shield style={{ width: 10, height: 10 }} /> SaaS Platform
+              </span>
+            </div>
+          </footer>
+        )}
 
         {/* Admin Password/PIN Security Login Modal */}
         <AdminLoginModal
@@ -1183,6 +1263,65 @@ export function App() {
           onSavePlatform={handleSavePlatform}
         />
 
+      </div>
+      {/* Toast Notification Container */}
+      <div style={{
+        position: 'fixed',
+        top: 20,
+        right: 20,
+        zIndex: 99999,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+        pointerEvents: 'none',
+        maxWidth: 380,
+      }}>
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className="animate-fade-in"
+            style={{
+              padding: '14px 18px',
+              borderRadius: 12,
+              background: toast.type === 'error'
+                ? 'rgba(239, 68, 68, 0.95)'
+                : toast.type === 'warning'
+                  ? 'rgba(234, 179, 8, 0.95)'
+                  : 'rgba(59, 130, 246, 0.95)',
+              color: toast.type === 'warning' ? '#000000' : '#ffffff',
+              fontSize: 13,
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+              backdropFilter: 'blur(12px)',
+              border: `1px solid ${toast.type === 'error' ? 'rgba(239,68,68,0.6)' : toast.type === 'warning' ? 'rgba(234,179,8,0.6)' : 'rgba(59,130,246,0.6)'}`,
+              pointerEvents: 'auto',
+              animation: 'fadeIn 0.3s ease',
+            }}
+          >
+            {toast.type === 'error' && <XCircle style={{ width: 18, height: 18, flexShrink: 0 }} />}
+            {toast.type === 'warning' && <AlertTriangle style={{ width: 18, height: 18, flexShrink: 0 }} />}
+            {toast.type === 'info' && <Info style={{ width: 18, height: 18, flexShrink: 0 }} />}
+            <span style={{ lineHeight: 1.4 }}>{toast.message}</span>
+            <button
+              onClick={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'inherit',
+                cursor: 'pointer',
+                padding: 2,
+                marginLeft: 'auto',
+                opacity: 0.7,
+                flexShrink: 0,
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        ))}
       </div>
     </>
   );
