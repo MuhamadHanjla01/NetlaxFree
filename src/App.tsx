@@ -54,13 +54,13 @@ export function App() {
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isVipModalOpen, setIsVipModalOpen] = useState(false);
-  
+
   const [authPin, setAuthPin] = useState(() => localStorage.getItem(LOCAL_STORAGE_KEY_PIN) || 'admin123');
 
   const [telegramUsername, setTelegramUsername] = useState<string>(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY_TELEGRAM);
     if (!saved || saved === 'admin_vip_support' || saved.includes('admin_vip_support')) {
-      return 'unkown010101010101010';
+      return 'netlaxfreevipsupport';
     }
     return saved;
   });
@@ -86,7 +86,7 @@ export function App() {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
-    } catch (e) {}
+    } catch (e) { }
     return DEFAULT_REGISTERED_USERS;
   });
 
@@ -177,7 +177,7 @@ export function App() {
       const channel = new BroadcastChannel('antigravity_realtime_sync');
       channel.postMessage({ type: 'USERS_UPDATE', data: registeredUsers });
       channel.close();
-    } catch (e) {}
+    } catch (e) { }
   }, [registeredUsers]);
 
   // Keep currentUser synced in real time when Admin promotes, demotes, or bans user
@@ -226,26 +226,26 @@ export function App() {
           setTelegramUsername(event.data.data);
         }
       };
-    } catch (e) {}
+    } catch (e) { }
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === LOCAL_STORAGE_KEY_BLOGS && e.newValue) {
         try {
           const parsed = JSON.parse(e.newValue);
           if (Array.isArray(parsed)) setPosts(parsed);
-        } catch (err) {}
+        } catch (err) { }
       }
       if (e.key === LOCAL_STORAGE_KEY_PAGES && e.newValue) {
         try {
           const parsed = JSON.parse(e.newValue);
           if (Array.isArray(parsed)) setSidebarPages(parsed);
-        } catch (err) {}
+        } catch (err) { }
       }
       if (e.key === LOCAL_STORAGE_KEY_REGISTERED_USERS && e.newValue) {
         try {
           const parsed = JSON.parse(e.newValue);
           if (Array.isArray(parsed)) setRegisteredUsers(parsed);
-        } catch (err) {}
+        } catch (err) { }
       }
       if (e.key === LOCAL_STORAGE_KEY_TELEGRAM && e.newValue) {
         setTelegramUsername(e.newValue);
@@ -301,7 +301,7 @@ export function App() {
             }
           }
         }
-      } catch (err) {} finally {
+      } catch (err) { } finally {
         if (isMounted) isInitialLoadCompletedRef.current = true;
       }
     };
@@ -357,20 +357,20 @@ export function App() {
       // Push to backend server file for DIFFERENT browsers
       console.log('Pushing to server! Deps changed.', Date.now());
       lastPushTimeRef.current = Date.now();
-      
+
       fetch('/api/sync', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'x-admin-pin': authPin
         },
         body: JSON.stringify({ posts, sidebarPages, adminPin, registeredUsers, telegramUsername }),
       }).then(res => {
         if (res.ok && authPin !== adminPin) {
-           setAuthPin(adminPin);
+          setAuthPin(adminPin);
         }
-      }).catch(() => {});
-    } catch (err) {}
+      }).catch(() => { });
+    } catch (err) { }
   }, [posts, sidebarPages, adminPin, registeredUsers, telegramUsername, authPin]);
 
   const handleLoadingFinish = useCallback(() => {
@@ -548,7 +548,7 @@ export function App() {
       setSelectedService(serviceName);
       return;
     }
-    
+
     if (isAdmin) {
       setSelectedService(serviceName);
       return;
@@ -660,7 +660,7 @@ export function App() {
 
         {/* Main Container */}
         <main className="app-container">
-          
+
           {/* Main View Flow: Admin Dashboard on 'All Services', Access Denied Screen on unauthorized admin attempt, or Service Page on selected platform */}
           {isAdmin && selectedService === 'All Services' ? (
             <AdminDashboard
@@ -687,7 +687,7 @@ export function App() {
             />
           ) : (
             <div>
-              
+
               {/* HOME VIEW: Show ONLY Streaming Platform Cards when on home */}
               {isMainHomeView ? (
                 <>
@@ -814,7 +814,7 @@ export function App() {
               ) : (
                 /* DEDICATED PLATFORM PAGE: Show all cards & guides related to selected service */
                 <div className="animate-fade-in">
-                  
+
                   {/* Top Bar Navigation */}
                   <div style={{
                     display: 'flex',
@@ -857,9 +857,9 @@ export function App() {
                   {(() => {
                     const currentPlatform = sidebarPages.find((p) => p.name === selectedService);
                     const color = currentPlatform?.color || '#E50914';
-                    const rulesText = currentPlatform?.description || 
+                    const rulesText = currentPlatform?.description ||
                       `How To Use & Setup Rules for ${selectedService}:\n1. Click PC LINK, MOBILE LINK, or TV LINK below to launch app.\n2. Log in using credential email: jayasekar04@gmail.com\n3. Select your assigned screen profile according to BASIC tier.\n4. Do not alter security PIN or account settings.`;
-                    
+
                     const rulesList = rulesText.split('\n').filter((r) => r.trim().length > 0);
 
                     return (

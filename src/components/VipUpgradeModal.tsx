@@ -9,12 +9,12 @@ interface Props {
 export const VipUpgradeModal: React.FC<Props> = ({
   isOpen,
   onClose,
-  telegramUsername = 'unkown010101010101010',
+  telegramUsername = 'netlaxfreevipsupport',
 }) => {
   if (!isOpen) return null;
 
   const effectiveUsername = (!telegramUsername || telegramUsername === 'admin_vip_support' || telegramUsername.includes('admin_vip_support'))
-    ? 'unkown010101010101010'
+    ? 'netlaxfreevipsupport'
     : telegramUsername;
 
   // Format telegram link cleanly
