@@ -138,7 +138,7 @@ export const BlogEditorModal: React.FC<Props> = ({
       netscapeConfig,
       cardFormat,
       accountType,
-      ...(expiryDays ? { expiryDays: Number(expiryDays) } : {}),
+      expiryDays: expiryDays ? Number(expiryDays) : undefined,
     };
 
     onSave(savedPost);

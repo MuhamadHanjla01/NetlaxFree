@@ -278,29 +278,49 @@ export function App() {
     }
   }, [registeredUsers]);
 
-  // Check and auto-delete expired cards based on expiryDays
+  // Auto-delete expired cards — runs on an interval, NOT on every posts change
+  // This prevents the bug where saving a card triggers immediate re-evaluation and deletion
   useEffect(() => {
-    let postsUpdated = false;
-    const now = Date.now();
-    
-    const checkedPosts = posts.filter(post => {
-      if (post.expiryDays && post.createdAt) {
-        const createdDate = new Date(post.createdAt).getTime();
-        const expiryDate = createdDate + (post.expiryDays * 24 * 60 * 60 * 1000);
-        
-        if (now > expiryDate) {
-          postsUpdated = true;
-          return false; // Remove this post
+    const checkExpiredCards = () => {
+      // Don't run until initial server data has loaded
+      if (!isInitialLoadCompletedRef.current) return;
+
+      const now = Date.now();
+      let hasExpired = false;
+
+      setPosts((currentPosts) => {
+        const filtered = currentPosts.filter(post => {
+          if (post.expiryDays && post.createdAt) {
+            const createdMs = new Date(post.createdAt).getTime();
+            // Safety: if createdAt is invalid or in the future, keep the card
+            if (isNaN(createdMs) || createdMs > now) return true;
+            const expiryMs = createdMs + (post.expiryDays * 86_400_000); // days → ms
+            if (now > expiryMs) {
+              hasExpired = true;
+              return false; // expired — remove
+            }
+          }
+          return true; // keep
+        });
+
+        if (hasExpired) {
+          lastPushTimeRef.current = Date.now();
+          return filtered;
         }
-      }
-      return true; // Keep this post
-    });
-    
-    if (postsUpdated) {
-      lastPushTimeRef.current = Date.now();
-      setPosts(checkedPosts);
-    }
-  }, [posts]);
+        return currentPosts; // no change — same reference, no re-render
+      });
+    };
+
+    // Check once after mount + initial load, then every 60 seconds
+    const initialDelay = setTimeout(checkExpiredCards, 3000);
+    const interval = setInterval(checkExpiredCards, 60_000);
+
+    return () => {
+      clearTimeout(initialDelay);
+      clearInterval(interval);
+    };
+  }, []); // empty deps — interval manages itself
+
 
   // Real-time BroadcastChannel & Storage Sync for 0ms cross-tab/window updates
   useEffect(() => {
