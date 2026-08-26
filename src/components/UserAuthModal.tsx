@@ -107,7 +107,7 @@ export const UserAuthModal: React.FC<Props> = ({
       createdAt: new Date().toISOString(),
     };
 
-    fetch('/api/register', {
+    fetch('/api/sync?action=register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newUser)

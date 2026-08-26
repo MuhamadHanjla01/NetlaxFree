@@ -45,6 +45,28 @@ export default function handler(req, res) {
         return res.status(400).json({ error: 'Empty request body' });
       }
 
+      // Handle public user registration
+      if (req.query && req.query.action === 'register') {
+        const newUser = {
+          id: data.id || `user_${Date.now()}`,
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          telegram: data.telegram,
+          role: 'user',
+          unlockedServices: [],
+          createdAt: data.createdAt || new Date().toISOString(),
+        };
+        
+        // Ensure registeredUsers exists
+        if (!globalStore.registeredUsers) globalStore.registeredUsers = [];
+        
+        globalStore.registeredUsers.push(newUser);
+        
+        const { password, ...safeUser } = newUser;
+        return res.status(201).json(safeUser);
+      }
+
       // Authenticate: x-admin-pin header must match stored adminPin
       const submittedPin = req.headers['x-admin-pin'];
       if (!submittedPin || submittedPin !== globalStore.adminPin) {
