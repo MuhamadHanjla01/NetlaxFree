@@ -18,7 +18,7 @@ import { LoadingScreen } from './components/LoadingScreen';
 import { Tv, ArrowLeft, Shield, CheckCircle2, Plus, Crown, Zap, User, AlertTriangle, XCircle, Info } from 'lucide-react';
 
 const LOCAL_STORAGE_KEY_BLOGS = 'netflix_blogs_app_data_v3';
-const LOCAL_STORAGE_KEY_POSTS = 'netlax_free_posts_v2';
+
 const LOCAL_STORAGE_KEY_PAGES = 'netflix_sidebar_pages_v1';
 const LOCAL_STORAGE_KEY_PIN = 'netflix_admin_pin_v1';
 const LOCAL_STORAGE_KEY_USER = 'netflix_current_user_v1';
