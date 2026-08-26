@@ -572,7 +572,8 @@ export function App() {
   // Is on main home view (no service or search filter active)
   const isMainHomeView = selectedService === 'All Services' && !searchQuery;
 
-  // Filter posts for Reader Feed
+  // Filter posts for Reader Feed — All cards visible to all users.
+  // VIP lock is enforced when opening a card (handleOpenPost), not here.
   const filteredPosts = posts.filter((post) => {
     const matchesService = selectedService === 'All Services' || post.service === selectedService;
     const matchesAccountType =
@@ -586,31 +587,13 @@ export function App() {
       (post.service && post.service.toLowerCase().includes(searchQuery.toLowerCase())) ||
       post.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    // Tier Enforced Visibility
-    let matchesTier = true;
-    if (!isAdmin) {
-      const userTier = activeUser?.accountTier || 'Free';
-      if (userTier === 'Free' && post.accountType !== 'Free') {
-        matchesTier = false;
-      }
-    }
-
-    return matchesService && matchesAccountType && matchesSearch && matchesTier;
+    return matchesService && matchesAccountType && matchesSearch;
   });
 
-  // Calculate post counts per platform for ServiceHub in real time (using tier-visible posts only)
+  // Calculate post counts per platform for ServiceHub (all cards count, VIP lock is on open)
   const postCountsByService = posts.reduce((acc, post) => {
-    let isVisible = true;
-    if (!isAdmin) {
-      const userTier = activeUser?.accountTier || 'Free';
-      if (userTier === 'Free' && post.accountType !== 'Free') {
-        isVisible = false;
-      }
-    }
-    if (isVisible) {
-      const srv = post.service || 'Netflix';
-      acc[srv] = (acc[srv] || 0) + 1;
-    }
+    const srv = post.service || 'Netflix';
+    acc[srv] = (acc[srv] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
@@ -1178,6 +1161,7 @@ export function App() {
                           post={post}
                           onReadArticle={(p) => handleOpenPost(p)}
                           isAdmin={isAdmin}
+                          isLocked={!isAdmin && (!activeUser || activeUser.accountTier === 'Free') && post.accountType === 'Prime'}
                           onEdit={(p) => {
                             setEditingPost(p);
                             setIsEditorOpen(true);

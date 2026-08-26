@@ -1,11 +1,12 @@
 import React from 'react';
 import type { BlogPost } from '../types/blog';
-import { Mail, Crown, Zap, Globe, ArrowUpRight, Shield, Edit3, Trash2, Flame, Clock } from 'lucide-react';
+import { Mail, Crown, Zap, Globe, ArrowUpRight, Shield, Edit3, Trash2, Flame, Clock, Lock } from 'lucide-react';
 
 interface Props {
   post: BlogPost;
   onReadArticle: (post: BlogPost) => void;
   isAdmin?: boolean;
+  isLocked?: boolean;
   onEdit?: (post: BlogPost) => void;
   onDelete?: (id: string) => void;
   onTogglePin?: (id: string) => void;
@@ -25,6 +26,7 @@ export const BlogCard: React.FC<Props> = ({
   post,
   onReadArticle,
   isAdmin,
+  isLocked,
   onEdit,
   onDelete,
   onTogglePin,
@@ -60,8 +62,33 @@ export const BlogCard: React.FC<Props> = ({
         boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
         display: 'flex',
         flexDirection: 'column',
+        position: 'relative',
       }}
     >
+      {/* VIP Lock Overlay for Free users viewing Prime cards */}
+      {isLocked && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 10,
+            background: 'rgba(4, 13, 18, 0.75)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 10,
+            borderRadius: 14,
+            cursor: 'pointer',
+          }}
+          onClick={() => onReadArticle(post)}
+        >
+          <Lock style={{ width: 32, height: 32, color: '#eab308' }} />
+          <span style={{ fontSize: 13, fontWeight: 900, color: '#eab308', letterSpacing: '0.08em' }}>VIP ONLY</span>
+          <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>Tap to unlock</span>
+        </div>
+      )}
       {/* Top Header inside Card */}
       <div
         style={{
