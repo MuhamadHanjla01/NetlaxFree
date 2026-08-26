@@ -290,11 +290,12 @@ export function App() {
 
       setPosts((currentPosts) => {
         const filtered = currentPosts.filter(post => {
-          if (post.expiryDays && post.createdAt) {
+          if (post.createdAt) {
+            const effectiveExpiryDays = post.expiryDays || 3;
             const createdMs = new Date(post.createdAt).getTime();
             // Safety: if createdAt is invalid or in the future, keep the card
             if (isNaN(createdMs) || createdMs > now) return true;
-            const expiryMs = createdMs + (post.expiryDays * 86_400_000); // days → ms
+            const expiryMs = createdMs + (effectiveExpiryDays * 86_400_000); // days → ms
             if (now > expiryMs) {
               hasExpired = true;
               return false; // expired — remove

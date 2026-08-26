@@ -148,8 +148,9 @@ export const BlogEditorModal: React.FC<Props> = ({
   return (
     <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="modal-container" style={{ maxWidth: 640 }}>
-        
+
         {/* Header */}
+
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Sparkles style={{ width: 18, height: 18, color: '#E50914' }} />
@@ -165,7 +166,7 @@ export const BlogEditorModal: React.FC<Props> = ({
         {/* Form Body */}
         <div className="modal-body">
           <form onSubmit={handleSubmit} className="editor-form">
-            
+
             {/* Account Title & Streaming Platform */}
             <div className="form-grid-2">
               <div className="form-group">

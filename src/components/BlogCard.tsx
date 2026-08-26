@@ -37,19 +37,46 @@ export const BlogCard: React.FC<Props> = ({
   const countryCode = post.countryCode || 'IN';
   const planTier = post.planTier || 'BASIC';
 
-  let expiryText = null;
-  if (post.expiryDays && post.createdAt) {
-    const createdDate = new Date(post.createdAt).getTime();
-    const expiryDate = createdDate + (post.expiryDays * 24 * 60 * 60 * 1000);
-    const now = Date.now();
-    const daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
-    
-    if (daysLeft > 0) {
-      expiryText = `${daysLeft} DAY${daysLeft !== 1 ? 'S' : ''} LEFT`;
-    } else {
-      expiryText = 'EXPIRED';
+  const [expiryText, setExpiryText] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!post.createdAt) {
+      setExpiryText(null);
+      return;
     }
-  }
+
+    const effectiveExpiryDays = post.expiryDays || 3;
+    const createdDate = new Date(post.createdAt).getTime();
+    const expiryDate = createdDate + (effectiveExpiryDays * 24 * 60 * 60 * 1000);
+
+    const updateTimer = () => {
+      const now = Date.now();
+      const diff = expiryDate - now;
+
+      if (diff <= 0) {
+        setExpiryText('EXPIRED');
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+      const parts = [];
+      if (days > 0) parts.push(`${days}d`);
+      if (hours > 0 || days > 0) parts.push(`${hours}h`);
+      if (mins > 0 || hours > 0 || days > 0) parts.push(`${mins}m`);
+      parts.push(`${secs}s`);
+
+      setExpiryText(parts.join(' '));
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [post.expiryDays, post.createdAt]);
+
 
   return (
     <div
