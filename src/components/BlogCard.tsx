@@ -259,26 +259,28 @@ export const BlogCard: React.FC<Props> = ({
           </div>
 
           {/* EXPIRY DAYS */}
-          <div
-            style={{
-              padding: '8px 12px',
-              borderRadius: 8,
-              background: '#1a0b0b',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 8,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, fontWeight: 800, color: '#ef4444' }}>
-              <Clock style={{ width: 13, height: 13, color: '#ef4444' }} />
-              <span>AUTO-DELETES IN</span>
+          {expiryText && (
+            <div
+              style={{
+                padding: '8px 12px',
+                borderRadius: 8,
+                background: '#1a0b0b',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 8,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, fontWeight: 800, color: '#ef4444' }}>
+                <Clock style={{ width: 13, height: 13, color: '#ef4444' }} />
+                <span>AUTO-DELETES IN</span>
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 900, color: '#ef4444', fontFamily: 'monospace', letterSpacing: '0.05em' }}>
+                {expiryText}
+              </span>
             </div>
-            <span style={{ fontSize: 11, fontWeight: 900, color: '#ef4444', fontFamily: 'monospace', letterSpacing: '0.05em' }}>
-              {expiryText || `N/A (created: ${!!post.createdAt}, days: ${post.expiryDays})`}
-            </span>
-          </div>
+          )}
         </div>
 
         {/* Read / Open Action Button */}
